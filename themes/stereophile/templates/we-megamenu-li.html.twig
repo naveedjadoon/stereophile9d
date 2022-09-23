@@ -1,0 +1,37 @@
+{% if attributes.hasClass('dropdown-menu') %}
+
+<li {{ attributes.addClass('has-dd js-has-dd').removeClass('dropdown-menu').removeClass('we-mega-menu-li') }}>
+
+
+{% else %}
+
+<li {{ attributes.removeClass('we-mega-menu-li') }}>
+
+
+
+{% endif %}
+
+  {% if href is empty %}
+   <div class="sub-menu-cat-header"> <a href='#' data-drupal-link-system-path="<front>"></a></div>
+      {% if (attribute(attributes, 'data-icon') is defined and attribute(attributes, 'data-icon')|trim) %}
+        <i class="{{ attribute(attributes, 'data-icon') }}"></i>
+      {% endif %}
+
+      {{- title -}}
+    </a>
+  {% else %}
+    <a class="" title="{{ attribute(attributes, 'description') }}" href="{{ href }}" target="{{ attribute(attributes, 'data-target') }}">
+      {% if (attribute(attributes, 'data-icon') is defined and attribute(attributes, 'data-icon')|trim) %}
+        <i class="{{ attribute(attributes, 'data-icon') }}"></i>
+      {% endif %}
+
+      {{- title -}}
+
+      {% if (attribute(attributes, 'data-caption') is defined and attribute(attributes, 'data-caption')|trim) %}
+        <span class="we-mega-menu-caption">{{ attribute(attributes, 'data-caption') }}</span>
+      {% endif %}
+    </a>
+  {% endif %}
+  {{ content }}
+</li>
+

@@ -1,0 +1,14 @@
+global-styling:
+   version: 1.0
+   css:
+    theme:
+      css/fonts.css: {}
+      css/plugins.css: {}
+      css/styles.css: {}
+   js:
+#     js/vendor/jquery/jquery-1.12.3.js: {}
+     js/plugins-min.js: {}
+     js/main-min.js: {}
+
+
+

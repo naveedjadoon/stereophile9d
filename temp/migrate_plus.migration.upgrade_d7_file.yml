@@ -1,0 +1,70 @@
+uuid: 0eb2d532-0763-4b86-8200-c31759ef29d4
+langcode: en
+status: true
+dependencies: {  }
+id: upgrade_d7_file
+class: Drupal\migrate\Plugin\Migration
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags:
+  - 'Drupal 7'
+  - Content
+migration_group: migrate_drupal_7
+label: 'Public files'
+source:
+  plugin: d7_file
+  scheme: public
+  constants:
+    source_base_path: 'http://stereophiled7.lndo.site'
+process:
+  fid:
+    -
+      plugin: get
+      source: fid
+  filename:
+    -
+      plugin: get
+      source: filename
+  source_full_path:
+    -
+      plugin: concat
+      delimiter: /
+      source:
+        - constants/source_base_path
+        - filepath
+    -
+      plugin: urlencode
+  uri:
+    -
+      plugin: file_copy
+      source:
+        - '@source_full_path'
+        - uri
+  filemime:
+    -
+      plugin: get
+      source: filemime
+  status:
+    -
+      plugin: get
+      source: status
+  created:
+    -
+      plugin: get
+      source: timestamp
+  changed:
+    -
+      plugin: get
+      source: timestamp
+  uid:
+    -
+      plugin: get
+      source: uid
+destination:
+  plugin: 'entity:file'
+
+
+
+
+
+lando drush sql:query "INSERT INTO stereophiled9.`book` (`nid`, `bid`, `pid`, `has_children`, `weight`, `depth`, `p1`, `p2`, `p3`, `p4`, `p5`, `p6`, `p7`, `p8`, `p9`) SELECT DISTINCT SUBSTRING(book.link_path, 6, 6) AS NID, SUBSTRING(book.menu_name, 10, 6) AS BID, book.plid AS PID, book.has_children AS has_children, book.weight AS weight, book.depth AS depth, SUBSTRING(m1.link_path, 6, 6) AS P1, book.p2 AS P2, book.p3 AS P3, book.p4 AS P4, book.p5 AS P5, book.p6 AS P6, book.p7 AS P7, book.p8 AS P8, book.p9 AS P9 FROM stereophiled7.`menu_links` AS book, `menu_links` AS m1 WHERE book.module = 'book' AND m1.module = 'book' AND book.p1 = m1.mlid and book.depth = 1"

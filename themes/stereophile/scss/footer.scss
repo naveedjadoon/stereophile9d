@@ -1,0 +1,105 @@
+
+footer{
+
+	position: relative;
+	color: #fff;
+	
+	a{
+		padding: 15px;
+		color: #fff;
+
+		&:hover,
+		&:focus,
+		&:active,
+		&:visited{ 
+			color: #fff !important; 
+			opacity: 1;
+		}
+	}
+
+	nav{
+		ul,
+		li{
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		ul{
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+			margin: 40px 0;
+		}
+
+		a{
+			padding: 15px;
+		}
+	}
+
+	.social-media-menu{
+
+		a{
+			font-size: 1.5rem;
+		}
+
+	}
+
+	.corporate{
+		margin: 40px 0;
+		text-align: center;
+
+		p{
+			margin-top: 30px;
+			font-size: 0.8rem;
+		}
+	}
+}
+
+
+.partners-bar{
+
+	padding: 20px;
+	background: $footer-partners-bar-background-color;
+	position: relative;
+	
+	&:before{
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: block;
+		content:"";
+		background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+		opacity: 0.5;
+		z-index: 1;
+	}
+
+	a,
+	img,
+	select{
+//		display: block;
+		position: relative;
+		z-index: 4;
+	}
+
+	select{
+		background: transparent url(#{$image-path}chevron-down-white.svg);
+		background-position: calc(100% - 14px) 50%;
+  		background-repeat: no-repeat;
+  		background-size: 12px 12px;
+  		color: #fff;
+  		margin: 0 auto;
+  		min-width: 50%;
+  		border: 1px solid rgba(#fff, 0.2);
+	}
+}
+
+.footer-bottom{
+
+	padding: 20px;
+	background: #000;
+}
+
+

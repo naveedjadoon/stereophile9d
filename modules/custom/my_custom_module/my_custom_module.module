@@ -1,0 +1,63 @@
+<?php
+// function YOURMODULENAME_update_9401() {
+//     ## Fixes:
+//     ## A non-existent config entity name returned by FieldStorageConfigInterface::getBundles(): entity type: paragraph, bundle: text, field name: field_image
+//     $entity_type = 'node';
+//     $bundle = 'Entity reference';
+//     $field_name = 'taxonomyextra';
+
+function my_module_update_9001() {
+
+  $problem_fields = array (
+    array("node","entity_reference","taxonomyextra"),
+    array("comment","comment_node_webform","comment_body"),
+    array("comment","comment_node_","comment_body"),
+    // array("taxonomy_term","blog_category","field_title"),
+  );
+
+  foreach($problem_fields as $arr){
+
+    $entity_type = $arr[0];
+    $bundle = $arr[1];
+    $field_name = $arr[2];
+
+    /** @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $key_value_factory */
+    $key_value_factory = \Drupal::service('keyvalue');
+
+    $field_map_kv_store = $key_value_factory->get('entity.definitions.bundle_field_map');
+
+    $map = $field_map_kv_store->get($entity_type);
+
+    // Remove the field_fpimage field from the bundle gallery_assist for the page bundle.
+    unset($map[$field_name]['bundles'][$bundle]);
+
+    $field_map_kv_store->set($entity_type, $map);
+  }
+}
+
+function my_custom_module_theme(){
+  return [
+    'ads' => [
+      'variables' => [
+        'ads_google' => NULL,
+      ],
+    ],
+    'topbannerad' =>[
+      'variables' =>[
+        'ads_google' => NULL,
+      ],
+    ],
+    'bottomtwocolads' =>[
+      'variables' =>[
+        'ads_google' => NULL,
+      ],
+    ],
+    'bottombannerad' =>[
+      'variables' =>[
+        'ads_google' => NULL,
+      ],
+    ],
+  ];
+}
+
+

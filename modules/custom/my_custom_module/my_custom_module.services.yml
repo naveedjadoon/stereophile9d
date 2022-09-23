@@ -1,0 +1,7 @@
+services:
+  update.commands:
+    class: \Drupal\my_custom_module\Commands\UpdateCommands
+    arguments:
+      - '@keyvalue'
+    tags:
+      - { name: drush.command }

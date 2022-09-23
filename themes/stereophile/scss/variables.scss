@@ -1,0 +1,28 @@
+//paths shouldn't need to be changed
+$font-path: "../fonts/";
+$image-path: "../img/";
+
+//---------Colors
+$primary-site-color: #003684;
+$hyper-link-color: #0d6efd;
+$text-color: #343434;
+$menu-bar-background-color: $primary-site-color;
+$footer-partners-bar-background-color: $primary-site-color;
+$h3-color: gold;
+
+//---------fonts
+//h tags
+$title-font: 'roboto-condensed-bold', arial, helvetica, sans-serif;
+//default copy font
+$copy-font: 'open-sans-regular', arial, helvetica, sans-serif;
+//b and strong tags within copy
+$copy-font-bold: 'open-sans-semi-bold', arial, helvetica, sans-serif;
+$copy-font-light: 'open-sans-light', arial, helvetica, sans-serif;
+
+$branding-icon: '#{$image-path}branding-icon.svg';
+
+$mbl-header-breakpoint: 950px;
+$mbl-menu-bar-height : 60px;
+$header-logo-height: 120px;
+$header-logo-max-width: 350px;
+

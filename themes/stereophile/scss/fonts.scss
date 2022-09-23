@@ -1,0 +1,40 @@
+@import "fontawesome/fontawesome.scss";
+@import "fontawesome/solid.scss";
+@import "fontawesome/regular.scss";
+@import "fontawesome/brands.scss";
+
+@import "variables.scss";
+
+@font-face {
+  font-family: 'roboto-condensed-light';
+  src: url('#{$font-path}RobotoCondensed-Light.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'roboto-condensed-regular';
+  src: url('#{$font-path}RobotoCondensed-Regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'roboto-condensed-bold';
+  src: url('#{$font-path}RobotoCondensed-Bold.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'open-sans-regular';
+  src: url('#{$font-path}OpenSans-Regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'open-sans-semi-bold';
+  src: url('#{$font-path}OpenSans-SemiBold.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'open-sans-light';
+  src: url('#{$font-path}OpenSans-Light.woff') format('woff');
+}

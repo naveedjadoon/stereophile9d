@@ -1,0 +1,23 @@
+name: stereophiled9
+recipe: drupal9
+config:
+  webroot: /
+proxy:
+  appserver:
+    - stereophiled9.lndo.site
+services:
+  appserver:
+    via: apache
+    type: php:8.0
+    webroot: /
+    xdebug: true
+  database:
+    type: mysql
+    creds:
+      user: stereophiled9
+      password: stereophiled9
+      database: stereophiled9
+  pma:
+    type: phpmyadmin
+    hosts:
+      - database

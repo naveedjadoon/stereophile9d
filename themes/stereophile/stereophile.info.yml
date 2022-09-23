@@ -1,0 +1,22 @@
+name: stereophile
+type: theme
+description: Stereophile Theme
+package: Other
+core_version_requirement: ^9
+libraries:
+  - stereophile/global-styling
+
+base theme: classy
+#Using Classy as a base theme https://www.drupal.org/theme-guide/8/classy
+
+regions:
+  branding: Site Branding
+  social_media_header_block: Social Media Header Block
+  user_login: User login
+  primary_menu: Primary menu
+  header: Header
+  highlighted: Highlighted
+  content: Content
+  sidebar_right: Sidebar Right
+  bottom_ads: Bottom Ads
+  footer: Footer

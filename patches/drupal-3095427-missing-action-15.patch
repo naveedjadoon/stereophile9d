@@ -1,0 +1,218 @@
+diff --git a/core/modules/system/migrations/d6_action.yml b/core/modules/system/migrations/d6_action.yml
+index 6870e88079..f9931825d9 100644
+--- a/core/modules/system/migrations/d6_action.yml
++++ b/core/modules/system/migrations/d6_action.yml
+@@ -11,7 +11,13 @@ process:
+       plugin: machine_name
+       source: aid
+   label: description
+-  type: type
++  type:
++    -
++      plugin: module_exists
++      source: type
++    -
++      plugin: skip_on_empty
++      method: row
+   plugin:
+     -
+       plugin: static_map
+diff --git a/core/modules/system/migrations/d7_action.yml b/core/modules/system/migrations/d7_action.yml
+index 21a83aa404..90b60306a7 100644
+--- a/core/modules/system/migrations/d7_action.yml
++++ b/core/modules/system/migrations/d7_action.yml
+@@ -11,7 +11,13 @@ process:
+       plugin: machine_name
+       source: aid
+   label: label
+-  type: type
++  type:
++    -
++      plugin: module_exists
++      source: type
++    -
++      plugin: skip_on_empty
++      method: row
+   plugin:
+     -
+       plugin: static_map
+diff --git a/core/modules/system/tests/src/Kernel/Migrate/d6/MigrateActionsPartialTest.php b/core/modules/system/tests/src/Kernel/Migrate/d6/MigrateActionsPartialTest.php
+new file mode 100644
+index 0000000000..a3dd7eacc4
+--- /dev/null
++++ b/core/modules/system/tests/src/Kernel/Migrate/d6/MigrateActionsPartialTest.php
+@@ -0,0 +1,39 @@
++<?php
++
++namespace Drupal\Tests\action\Kernel\Migrate\d6;
++
++use Drupal\migrate\Plugin\MigrateIdMapInterface;
++use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
++
++/**
++ * Tests migration of action items when destination has subset of modules.
++ *
++ * @group action
++ *
++ * @internal
++ */
++class MigrateActionsPartialTest extends MigrateDrupal6TestBase {
++
++  /**
++   * {@inheritdoc}
++   */
++  protected static $modules = ['action', 'node'];
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function setUp(): void {
++    parent::setUp();
++    $this->executeMigration('d6_action');
++  }
++
++  /**
++   * Test Drupal 6 action migration ignores rows in Drupal 8.
++   */
++  public function testActions() {
++    $id_map_plugin = $this->migration->getIdMap();
++    $map_row = $id_map_plugin->getRowBySource(['aid' => 'comment_publish_action']);
++    $this->assertEquals(MigrateIdMapInterface::STATUS_IGNORED, $map_row['source_row_status']);
++  }
++
++}
+diff --git a/core/modules/system/tests/src/Kernel/Migrate/d7/MigrateActionsPartialTest.php b/core/modules/system/tests/src/Kernel/Migrate/d7/MigrateActionsPartialTest.php
+new file mode 100644
+index 0000000000..b1d68a7b50
+--- /dev/null
++++ b/core/modules/system/tests/src/Kernel/Migrate/d7/MigrateActionsPartialTest.php
+@@ -0,0 +1,39 @@
++<?php
++
++namespace Drupal\Tests\action\Kernel\Migrate\d7;
++
++use Drupal\migrate\Plugin\MigrateIdMapInterface;
++use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
++
++/**
++ * Tests migration of action items when destination has subset of modules.
++ *
++ * @group action
++ *
++ * @internal
++ */
++class MigrateActionsPartialTest extends MigrateDrupal7TestBase {
++
++  /**
++   * {@inheritdoc}
++   */
++  protected static $modules = ['action', 'node'];
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function setUp(): void {
++    parent::setUp();
++    $this->executeMigration('d7_action');
++  }
++
++  /**
++   * Test Drupal 7 action migration ignores rows ins Drupal 8.
++   */
++  public function testActions() {
++    $id_map_plugin = $this->migration->getIdMap();
++    $map_row = $id_map_plugin->getRowBySource(['aid' => 'comment_publish_action']);
++    $this->assertEquals(MigrateIdMapInterface::STATUS_IGNORED, $map_row['source_row_status']);
++  }
++
++}
+diff --git a/core/modules/migrate/src/Plugin/migrate/process/ModuleExists.php b/core/modules/migrate/src/Plugin/migrate/process/ModuleExists.php
+new file mode 100644
+index 0000000000..251792820d
+--- /dev/null
++++ b/core/modules/migrate/src/Plugin/migrate/process/ModuleExists.php
+@@ -0,0 +1,84 @@
++<?php
++
++namespace Drupal\migrate\Plugin\migrate\process;
++
++use Drupal\Core\Extension\ModuleHandlerInterface;
++use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
++use Drupal\migrate\MigrateExecutableInterface;
++use Drupal\migrate\ProcessPluginBase;
++use Drupal\migrate\Row;
++use Symfony\Component\DependencyInjection\ContainerInterface;
++
++/**
++ * This plugin checks if a given module exists by name.
++ *
++ * If the module does not exist, then the row is skipped.
++ *
++ * Example usage with configuration:
++ *
++ * @code
++ *   module:
++ *     plugin: module_exists
++ *     source: module
++ * @endcode
++ *
++ * @MigrateProcessPlugin(
++ *   id = "module_exists"
++ * )
++ *
++ * @internal
++ */
++class ModuleExists extends ProcessPluginBase implements ContainerFactoryPluginInterface {
++
++  /**
++   * The module handler.
++   *
++   * @var \Drupal\Core\Extension\ModuleHandlerInterface
++   */
++  protected $moduleHandler;
++
++  /**
++   * ModuleExists constructor.
++   *
++   * @param array $configuration
++   *   A configuration array containing information about the plugin instance.
++   * @param string $plugin_id
++   *   The plugin ID.
++   * @param mixed $plugin_definition
++   *   The plugin implementation definition.
++   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
++   *   The module handler.
++   */
++  public function __construct(array $configuration, $plugin_id, $plugin_definition, ModuleHandlerInterface $moduleHandler) {
++    parent::__construct($configuration, $plugin_id, $plugin_definition);
++    $this->moduleHandler = $moduleHandler;
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
++    return new static(
++      $configuration,
++      $plugin_id,
++      $plugin_definition,
++      $container->get('module_handler')
++    );
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
++    if (is_array($value)) {
++      $value = reset($value);
++    }
++
++    if ($this->moduleHandler->moduleExists($value)) {
++      return $value;
++    }
++
++    return FALSE;
++  }
++
++}

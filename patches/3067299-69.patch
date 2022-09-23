@@ -1,0 +1,328 @@
+diff --git a/core/modules/system/migrations/state/action.migrate_drupal.yml b/core/modules/system/migrations/state/action.migrate_drupal.yml
+deleted file mode 100644
+index b513752a62..0000000000
+--- a/core/modules/system/migrations/state/action.migrate_drupal.yml
++++ /dev/null
+@@ -1,5 +0,0 @@
+-finished:
+-  6:
+-    system: action
+-  7:
+-    system: action
+diff --git a/core/modules/action/src/Plugin/migrate/source/Action.php b/core/modules/action/src/Plugin/migrate/source/Action.php
+index 6cc1ad157c..ed68d4d7c3 100644
+--- a/core/modules/action/src/Plugin/migrate/source/Action.php
++++ b/core/modules/action/src/Plugin/migrate/source/Action.php
+@@ -2,8 +2,9 @@
+
+ namespace Drupal\action\Plugin\migrate\source;
+
+-use Drupal\migrate_drupal\Plugin\migrate\source\DrupalSqlBase;
+-use Drupal\migrate\Row;
++@trigger_error('The ' . __NAMESPACE__ . '\Action is deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. Use \Drupal\system\Plugin\migrate\source\Action instead. See https://www.drupal.org/node/3110401', E_USER_DEPRECATED);
++
++use Drupal\system\Plugin\migrate\source\Action as SystemAction;
+
+ /**
+  * Drupal 6/7 action source from database.
+@@ -13,63 +14,11 @@
+  * @see \Drupal\migrate\Plugin\migrate\source\SqlBase
+  * @see \Drupal\migrate\Plugin\migrate\source\SourcePluginBase
+  *
+- * @MigrateSource(
+- *   id = "action",
+- *   source_module = "system"
+- * )
++ * @deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. Use
++ *   \Drupal\system\Plugin\migrate\source\Action instead.
++ *
++ * @see https://www.drupal.org/node/3110401
+  */
+-class Action extends DrupalSqlBase {
+-
+-  /**
+-   * {@inheritdoc}
+-   */
+-  public function query() {
+-    return $this->select('actions', 'a')
+-      ->fields('a');
+-  }
+-
+-  /**
+-   * {@inheritdoc}
+-   */
+-  public function fields() {
+-    $fields = [
+-      'aid' => $this->t('Action ID'),
+-      'type' => $this->t('Module'),
+-      'callback' => $this->t('Callback function'),
+-      'parameters' => $this->t('Action configuration'),
+-    ];
+-    if ($this->getModuleSchemaVersion('system') >= 7000) {
+-      $fields['label'] = $this->t('Label of the action');
+-    }
+-    else {
+-      $fields['description'] = $this->t('Action description');
+-    }
+-    return $fields;
+-  }
+-
+-  /**
+-   * {@inheritdoc}
+-   */
+-  public function getIds() {
+-    $ids['aid']['type'] = 'string';
+-    return $ids;
+-  }
+-
+-  /**
+-   * {@inheritdoc}
+-   */
+-  public function prepareRow(Row $row) {
+-    $aid = $row->getSourceProperty('aid');
+-    if (is_numeric($aid)) {
+-      if ($this->getModuleSchemaVersion('system') >= 7000) {
+-        $label = $row->getSourceProperty('label');
+-      }
+-      else {
+-        $label = $row->getSourceProperty('description');
+-      }
+-      $row->setSourceProperty('aid', $label);
+-    }
+-    return parent::prepareRow($row);
+-  }
++class Action extends SystemAction {
+
+ }
+diff --git a/core/modules/action/tests/src/Unit/Plugin/migrate/source/ActionTest.php b/core/modules/action/tests/src/Unit/Plugin/migrate/source/ActionTest.php
+new file mode 100644
+index 0000000000..82707d08d1
+--- /dev/null
++++ b/core/modules/action/tests/src/Unit/Plugin/migrate/source/ActionTest.php
+@@ -0,0 +1,31 @@
++<?php
++
++namespace Drupal\Tests\action\Unit\Plugin\migrate\source;
++
++use Drupal\action\Plugin\migrate\source\Action;
++use Drupal\Tests\migrate\Unit\MigrateTestCase;
++
++/**
++ * Tests actions source plugin.
++ *
++ * @covers \Drupal\action\Plugin\migrate\source\Action
++ * @group legacy
++ */
++class ActionTest extends MigrateTestCase {
++
++  /**
++   * Tests deprecation of Action plugin.
++   */
++  public function testDeprecatedPlugin() {
++    $this->expectDeprecation("The Drupal\action\Plugin\migrate\source\Action is deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. Use \Drupal\system\Plugin\migrate\source\Action instead. See https://www.drupal.org/node/3110401");
++    new Action(
++      [],
++      'action',
++      [],
++      $this->prophesize('Drupal\migrate\Plugin\MigrationInterface')->reveal(),
++      $this->prophesize('Drupal\Core\State\StateInterface')->reveal(),
++      $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface')->reveal()
++    );
++  }
++
++}
+diff --git a/core/modules/aggregator/tests/src/Functional/migrate_drupal_ui/d6/UpgradeTest.php b/core/modules/aggregator/tests/src/Functional/migrate_drupal_ui/d6/UpgradeTest.php
+index 6b25697457..29b0bc4be9 100644
+--- a/core/modules/aggregator/tests/src/Functional/migrate_drupal_ui/d6/UpgradeTest.php
++++ b/core/modules/aggregator/tests/src/Functional/migrate_drupal_ui/d6/UpgradeTest.php
+@@ -85,7 +85,7 @@ protected function getEntityCounts() {
+       'search_page' => 2,
+       'shortcut' => 2,
+       'shortcut_set' => 1,
+-      'action' => 27,
++      'action' => 33,
+       'menu' => 8,
+       'path_alias' => 8,
+       'taxonomy_term' => 15,
+diff --git a/core/modules/aggregator/tests/src/Functional/migrate_drupal_ui/d7/UpgradeTest.php b/core/modules/aggregator/tests/src/Functional/migrate_drupal_ui/d7/UpgradeTest.php
+index 0b7427dc07..4fc9a43e6b 100644
+--- a/core/modules/aggregator/tests/src/Functional/migrate_drupal_ui/d7/UpgradeTest.php
++++ b/core/modules/aggregator/tests/src/Functional/migrate_drupal_ui/d7/UpgradeTest.php
+@@ -86,7 +86,7 @@ protected function getEntityCounts() {
+       'search_page' => 2,
+       'shortcut' => 6,
+       'shortcut_set' => 2,
+-      'action' => 21,
++      'action' => 27,
+       'menu' => 7,
+       'taxonomy_term' => 25,
+       'taxonomy_vocabulary' => 8,
+diff --git a/core/modules/migrate_drupal/tests/src/Kernel/StateFileExistsTest.php b/core/modules/migrate_drupal/tests/src/Kernel/StateFileExistsTest.php
+index 1313851eed..d74af095bf 100644
+--- a/core/modules/migrate_drupal/tests/src/Kernel/StateFileExistsTest.php
++++ b/core/modules/migrate_drupal/tests/src/Kernel/StateFileExistsTest.php
+@@ -36,7 +36,6 @@ class StateFileExistsTest extends MigrateDrupalTestBase {
+    * @var array
+    */
+   protected $stateFileRequired = [
+-    'action',
+     // @todo Remove aggregator in https://www.drupal.org/project/drupal/issues/3264120
+     'aggregator',
+     'ban',
+diff --git a/core/modules/migrate_drupal_ui/tests/src/Functional/d6/Upgrade6Test.php b/core/modules/migrate_drupal_ui/tests/src/Functional/d6/Upgrade6Test.php
+index 1a85d893dd..00b689e11d 100644
+--- a/core/modules/migrate_drupal_ui/tests/src/Functional/d6/Upgrade6Test.php
++++ b/core/modules/migrate_drupal_ui/tests/src/Functional/d6/Upgrade6Test.php
+@@ -92,7 +92,7 @@ protected function getEntityCounts() {
+       'search_page' => 2,
+       'shortcut' => 2,
+       'shortcut_set' => 1,
+-      'action' => 27,
++      'action' => 33,
+       'menu' => 8,
+       'path_alias' => 8,
+       'taxonomy_term' => 15,
+diff --git a/core/modules/migrate_drupal_ui/tests/src/Functional/d7/Upgrade7Test.php b/core/modules/migrate_drupal_ui/tests/src/Functional/d7/Upgrade7Test.php
+index 7c9d40b52a..7b7b38f928 100644
+--- a/core/modules/migrate_drupal_ui/tests/src/Functional/d7/Upgrade7Test.php
++++ b/core/modules/migrate_drupal_ui/tests/src/Functional/d7/Upgrade7Test.php
+@@ -95,7 +95,7 @@ protected function getEntityCounts() {
+       'search_page' => 2,
+       'shortcut' => 6,
+       'shortcut_set' => 2,
+-      'action' => 21,
++      'action' => 27,
+       'menu' => 7,
+       'taxonomy_term' => 25,
+       'taxonomy_vocabulary' => 8,
+diff --git a/core/modules/system/migrations/action_settings.yml b/core/modules/system/migrations/action_settings.yml
+similarity index 92%
+rename from core/modules/system/migrations/action_settings.yml
+rename to core/modules/system/migrations/action_settings.yml
+index acc446ed64..28b1bd4063 100644
+--- a/core/modules/system/migrations/action_settings.yml
++++ b/core/modules/system/migrations/action_settings.yml
+@@ -17,4 +17,4 @@ process:
+ destination:
+   plugin: config
+   config_name: null
+-  destination_module: action
++  destination_module: system
+diff --git a/core/modules/system/migrations/d6_action.yml b/core/modules/system/migrations/d6_action.yml
+similarity index 100%
+rename from core/modules/system/migrations/d6_action.yml
+rename to core/modules/system/migrations/d6_action.yml
+diff --git a/core/modules/system/migrations/d7_action.yml b/core/modules/system/migrations/d7_action.yml
+similarity index 100%
+rename from core/modules/system/migrations/d7_action.yml
+rename to core/modules/system/migrations/d7_action.yml
+diff --git a/core/modules/action/src/Plugin/migrate/source/Action.php b/core/modules/system/src/Plugin/migrate/source/Action.php
+similarity index 83%
+copy from core/modules/action/src/Plugin/migrate/source/Action.php
+copy to core/modules/system/src/Plugin/migrate/source/Action.php
+index 6cc1ad157c..f03b92b1c8 100644
+--- a/core/modules/action/src/Plugin/migrate/source/Action.php
++++ b/core/modules/system/src/Plugin/migrate/source/Action.php
+@@ -1,17 +1,12 @@
+ <?php
+
+-namespace Drupal\action\Plugin\migrate\source;
++namespace Drupal\system\Plugin\migrate\source;
+
+ use Drupal\migrate_drupal\Plugin\migrate\source\DrupalSqlBase;
+ use Drupal\migrate\Row;
+
+ /**
+- * Drupal 6/7 action source from database.
+- *
+- * For available configuration keys, refer to the parent classes.
+- *
+- * @see \Drupal\migrate\Plugin\migrate\source\SqlBase
+- * @see \Drupal\migrate\Plugin\migrate\source\SourcePluginBase
++ * Drupal action source from database.
+  *
+  * @MigrateSource(
+  *   id = "action",
+diff --git a/core/modules/action/tests/src/Kernel/Migrate/d6/MigrateActionConfigsTest.php b/core/modules/system/tests/src/Kernel/Migrate/d6/MigrateActionConfigsTest.php
+similarity index 93%
+rename from core/modules/action/tests/src/Kernel/Migrate/d6/MigrateActionConfigsTest.php
+rename to core/modules/system/tests/src/Kernel/Migrate/d6/MigrateActionConfigsTest.php
+index 71f675085e..1df88d2f77 100644
+--- a/core/modules/action/tests/src/Kernel/Migrate/d6/MigrateActionConfigsTest.php
++++ b/core/modules/system/tests/src/Kernel/Migrate/d6/MigrateActionConfigsTest.php
+@@ -1,6 +1,6 @@
+ <?php
+
+-namespace Drupal\Tests\action\Kernel\Migrate\d6;
++namespace Drupal\Tests\system\Kernel\Migrate\d6;
+
+ use Drupal\Tests\SchemaCheckTestTrait;
+ use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
+diff --git a/core/modules/action/tests/src/Kernel/Migrate/d6/MigrateActionsTest.php b/core/modules/system/tests/src/Kernel/Migrate/d6/MigrateActionsTest.php
+similarity index 98%
+rename from core/modules/action/tests/src/Kernel/Migrate/d6/MigrateActionsTest.php
+rename to core/modules/system/tests/src/Kernel/Migrate/d6/MigrateActionsTest.php
+index 239c5ab0d8..9f29b98a29 100644
+--- a/core/modules/action/tests/src/Kernel/Migrate/d6/MigrateActionsTest.php
++++ b/core/modules/system/tests/src/Kernel/Migrate/d6/MigrateActionsTest.php
+@@ -1,6 +1,6 @@
+ <?php
+
+-namespace Drupal\Tests\action\Kernel\Migrate\d6;
++namespace Drupal\Tests\system\Kernel\Migrate\d6;
+
+ use Drupal\system\Entity\Action;
+ use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
+diff --git a/core/modules/action/tests/src/Kernel/Migrate/d7/MigrateActionConfigsTest.php b/core/modules/system/tests/src/Kernel/Migrate/d7/MigrateActionConfigsTest.php
+similarity index 93%
+rename from core/modules/action/tests/src/Kernel/Migrate/d7/MigrateActionConfigsTest.php
+rename to core/modules/system/tests/src/Kernel/Migrate/d7/MigrateActionConfigsTest.php
+index 93401c5402..8c1ce305ff 100644
+--- a/core/modules/action/tests/src/Kernel/Migrate/d7/MigrateActionConfigsTest.php
++++ b/core/modules/system/tests/src/Kernel/Migrate/d7/MigrateActionConfigsTest.php
+@@ -1,6 +1,6 @@
+ <?php
+
+-namespace Drupal\Tests\action\Kernel\Migrate\d7;
++namespace Drupal\Tests\system\Kernel\Migrate\d7;
+
+ use Drupal\Tests\SchemaCheckTestTrait;
+ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
+diff --git a/core/modules/action/tests/src/Kernel/Migrate/d7/MigrateActionsTest.php b/core/modules/system/tests/src/Kernel/Migrate/d7/MigrateActionsTest.php
+similarity index 98%
+rename from core/modules/action/tests/src/Kernel/Migrate/d7/MigrateActionsTest.php
+rename to core/modules/system/tests/src/Kernel/Migrate/d7/MigrateActionsTest.php
+index 920af40533..e9ab3c3943 100644
+--- a/core/modules/action/tests/src/Kernel/Migrate/d7/MigrateActionsTest.php
++++ b/core/modules/system/tests/src/Kernel/Migrate/d7/MigrateActionsTest.php
+@@ -1,6 +1,6 @@
+ <?php
+
+-namespace Drupal\Tests\action\Kernel\Migrate\d7;
++namespace Drupal\Tests\system\Kernel\Migrate\d7;
+
+ use Drupal\system\Entity\Action;
+ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
+diff --git a/core/modules/action/tests/src/Kernel/Plugin/migrate/source/ActionTest.php b/core/modules/system/tests/src/Kernel/Plugin/migrate/source/ActionTest.php
+similarity index 92%
+rename from core/modules/action/tests/src/Kernel/Plugin/migrate/source/ActionTest.php
+rename to core/modules/system/tests/src/Kernel/Plugin/migrate/source/ActionTest.php
+index e70f88e43a..23402416c9 100644
+--- a/core/modules/action/tests/src/Kernel/Plugin/migrate/source/ActionTest.php
++++ b/core/modules/system/tests/src/Kernel/Plugin/migrate/source/ActionTest.php
+@@ -1,13 +1,13 @@
+ <?php
+
+-namespace Drupal\Tests\action\Kernel\Plugin\migrate\source;
++namespace Drupal\Tests\system\Kernel\Plugin\migrate\source;
+
+ use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
+
+ /**
+  * Tests actions source plugin.
+  *
+- * @covers \Drupal\action\Plugin\migrate\source\Action
++ * @covers \Drupal\system\Plugin\migrate\source\Action
+  * @group action
+  */
+ class ActionTest extends MigrateSqlSourceTestBase {

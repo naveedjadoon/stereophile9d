@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * SUBTHEME theme file.
+ */
+
+function chizmiz_theme_suggestions_page_alter(array &$suggestions, array $variables) {
+    // Add content type suggestions.
+    if ($node = \Drupal::request()->attributes->get('node')) {
+      array_splice($suggestions, 1, 0, 'page__node__' . $node->getType());
+    }
+  }
+  function chizmiz_preprocess_node(&$variables) {
+    $variables['lang'] = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  }
+  function chizmiz_preprocess_views(&$variables) {
+    $variables['lang'] = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  }
